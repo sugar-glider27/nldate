@@ -24,3 +24,6 @@ uv run ruff check
 uv run ruff format --check
 ```
 
+## Environment
+
+If you’re running on Linux, leave the project’s .venv untouched. Before running any uv command, set UV_PROJECT_ENVIRONMENT to a directory outside the project, such as /tmp/nldate-linux-venv. If you’re running on macOS, use the project’s .venv normally.

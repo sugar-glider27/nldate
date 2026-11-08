@@ -11,7 +11,7 @@ _YEARS_MONTHS_RE = re.compile(
     r"^([a-z0-9]+)\s+years?\s+and\s+([a-z0-9]+)\s+months?\s+after\s+(.+)$"
 )
 _IN_OFFSET_RE = re.compile(r"^in\s+([a-z0-9]+)\s+(days?|weeks?|months?|years?)$")
-_DAYS_AGO_RE = re.compile(r"^([a-z0-9]+)\s+days?\s+ago$")
+_DAYS_AGO_RE = re.compile(r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+ago$")
 _WEEKDAYS = {
     "monday": 0,
     "tuesday": 1,
@@ -125,6 +125,13 @@ def _resolve_relative(text: str, ref: date) -> date | None:
         count = _parse_count(days_ago.group(1))
         if count is None:
             return None
+        unit = days_ago.group(2)
+        if unit.startswith("week"):
+            return ref - timedelta(weeks=count)
+        if unit.startswith("month"):
+            return _shift_months(ref, -count)
+        if unit.startswith("year"):
+            return _shift_months(ref, -count * 12)
         return ref - timedelta(days=count)
 
     next_weekday = _NEXT_WEEKDAY_RE.match(text)
@@ -168,9 +175,9 @@ def _resolve_relative(text: str, ref: date) -> date | None:
 
 
 def _shift_months(d: date, months: int) -> date:
-    total = (d.month - 1) + months
-    year = d.year + total // 12
-    month = total % 12 + 1
+    absolute = d.year * 12 + (d.month - 1) + months
+    year = absolute // 12
+    month = absolute % 12 + 1
     day = min(d.day, monthrange(year, month)[1])
     return date(year, month, day)
 

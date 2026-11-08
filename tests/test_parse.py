@@ -149,6 +149,78 @@ def test_in_one_year():
     assert feedback == target
 
 
+def test_one_week_ago():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 1)
+
+    # when
+    feedback = parse("1 week ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_two_weeks_ago():
+    # given
+    today = date(2026, 1, 5)
+    target = date(2025, 12, 22)
+
+    # when
+    feedback = parse("two weeks ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_one_month_ago():
+    # given
+    today = date(2024, 3, 31)
+    target = date(2024, 2, 29)
+
+    # when
+    feedback = parse("1 month ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_three_months_ago():
+    # given
+    today = date(2026, 5, 31)
+    target = date(2026, 2, 28)
+
+    # when
+    feedback = parse("3 months ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_one_year_ago():
+    # given
+    today = date(2024, 2, 29)
+    target = date(2023, 2, 28)
+
+    # when
+    feedback = parse("one year ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_four_years_ago():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2022, 11, 8)
+
+    # when
+    feedback = parse("4 years ago", today)
+
+    # then
+    assert feedback == target
+
+
 def test_three_days_ago():
     # given
     today = date(2026, 11, 8)

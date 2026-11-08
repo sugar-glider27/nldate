@@ -10,7 +10,7 @@ _WEEKS_FROM_RE = re.compile(r"^([a-z0-9]+)\s+weeks?\s+from\s+(.+)$")
 _YEARS_MONTHS_RE = re.compile(
     r"^([a-z0-9]+)\s+years?\s+and\s+([a-z0-9]+)\s+months?\s+after\s+(.+)$"
 )
-_IN_DAYS_RE = re.compile(r"^in\s+([a-z0-9]+)\s+days?$")
+_IN_OFFSET_RE = re.compile(r"^in\s+([a-z0-9]+)\s+(days?|weeks?)$")
 _DAYS_AGO_RE = re.compile(r"^([a-z0-9]+)\s+days?\s+ago$")
 _WEEKDAYS = {
     "monday": 0,
@@ -106,11 +106,13 @@ def _resolve_relative(text: str, ref: date) -> date | None:
     if text == "last month":
         return _shift_months(ref, -1)
 
-    in_days = _IN_DAYS_RE.match(text)
-    if in_days is not None:
-        count = _parse_count(in_days.group(1))
+    in_offset = _IN_OFFSET_RE.match(text)
+    if in_offset is not None:
+        count = _parse_count(in_offset.group(1))
         if count is None:
             return None
+        if in_offset.group(2).startswith("week"):
+            return ref + timedelta(weeks=count)
         return ref + timedelta(days=count)
 
     days_ago = _DAYS_AGO_RE.match(text)

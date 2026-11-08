@@ -77,6 +77,30 @@ def test_in_three_days():
     assert feedback == target
 
 
+def test_in_2_weeks():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 22)
+
+    # when
+    feedback = parse("in 2 weeks", today)
+
+    # then
+    assert feedback == target
+
+
+def test_in_one_week():
+    # given
+    today = date(2026, 12, 28)
+    target = date(2027, 1, 4)
+
+    # when
+    feedback = parse("in one week", today)
+
+    # then
+    assert feedback == target
+
+
 def test_three_days_ago():
     # given
     today = date(2026, 11, 8)

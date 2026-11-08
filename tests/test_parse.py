@@ -220,6 +220,39 @@ def test_five_days_before_dec_1_2025():
     assert feedback == target
 
 
+def test_dec_1_2025_with_period():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2025, 12, 1)
+
+    # when
+    feedback = parse("Dec. 1, 2025", today)
+
+    # then
+    assert feedback == target
+
+
+def test_five_days_before_feb_29_2024():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2024, 2, 24)
+
+    # when
+    feedback = parse("5 days before Feb. 29, 2024", today)
+
+    # then
+    assert feedback == target
+
+
+def test_feb_29_2025_with_period_raises_value_error():
+    # given
+    today = date(2026, 11, 8)
+
+    # when / then
+    with pytest.raises(ValueError):
+        parse("Feb. 29, 2025", today)
+
+
 def test_years_and_months_after_yesterday():
     # given
     today = date(2026, 11, 8)

@@ -3,7 +3,7 @@ from calendar import monthrange
 from datetime import date, datetime, timedelta
 
 _ABSOLUTE_FORMATS = ("%Y-%m-%d", "%Y/%m/%d")
-_NAMED_DATE_RE = re.compile(r"^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s+(\d{4})$")
+_NAMED_DATE_RE = re.compile(r"^([a-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s+(\d{4})$")
 _NEXT_WEEKDAY_RE = re.compile(r"^next\s+([a-z]+)$")
 _BEFORE_DAYS_RE = re.compile(r"^([a-z0-9]+)\s+days?\s+before\s+(.+)$")
 _WEEKS_FROM_RE = re.compile(r"^([a-z0-9]+)\s+weeks?\s+from\s+(.+)$")

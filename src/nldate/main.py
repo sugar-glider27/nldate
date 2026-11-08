@@ -47,6 +47,20 @@ _MONTH_NAMES = {
     "november": 11,
     "december": 12,
 }
+_MONTH_ABBREVIATIONS = {
+    "jan": 1,
+    "feb": 2,
+    "mar": 3,
+    "apr": 4,
+    "may": 5,
+    "jun": 6,
+    "jul": 7,
+    "aug": 8,
+    "sep": 9,
+    "oct": 10,
+    "nov": 11,
+    "dec": 12,
+}
 
 
 def parse(s: str, today: date | None = None) -> date:
@@ -69,6 +83,8 @@ def _resolve_relative(text: str, ref: date) -> date | None:
     named = _NAMED_DATE_RE.match(text)
     if named is not None:
         month = _MONTH_NAMES.get(named.group(1))
+        if month is None:
+            month = _MONTH_ABBREVIATIONS.get(named.group(1))
         if month is None:
             return None
         return date(int(named.group(3)), month, int(named.group(2)))

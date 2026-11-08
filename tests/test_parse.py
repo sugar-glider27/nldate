@@ -443,3 +443,63 @@ def test_absolute_date_2025():
 
     # then
     assert feedback == target
+
+
+def test_one_week_ago_from_feb_29():
+    # given
+    today = date(2024, 2, 29)
+    target = date(2024, 2, 22)
+
+    # when
+    feedback = parse("1 week ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_three_weeks_ago():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 10, 18)
+
+    # when
+    feedback = parse("3 weeks ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_two_months_ago():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 9, 8)
+
+    # when
+    feedback = parse("2 months ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_one_month_ago_from_may_31st():
+    # given
+    today = date(2026, 5, 31)
+    target = date(2026, 4, 30)
+
+    # when
+    feedback = parse("1 month ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_five_years_ago():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2021, 11, 8)
+
+    # when
+    feedback = parse("5 years ago", today)
+
+    # then
+    assert feedback == target

@@ -53,6 +53,18 @@ def test_day_after_tomorrow():
     assert feedback == target
 
 
+def test_in_two_days():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 10)
+
+    # when
+    feedback = parse("in two days", today)
+
+    # then
+    assert feedback == target
+
+
 def test_in_three_days():
     # given
     today = date(2026, 11, 8)
@@ -137,3 +149,75 @@ def test_today_without_reference_returns_current_date():
 
     # then
     assert feedback == date.today()
+
+
+def test_next_tuesday():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 10)
+
+    # when
+    feedback = parse("next Tuesday", today)
+
+    # then
+    assert feedback == target
+
+
+def test_days_before_named_date():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2025, 11, 26)
+
+    # when
+    feedback = parse("5 days before December 1st, 2025", today)
+
+    # then
+    assert feedback == target
+
+
+def test_years_and_months_after_yesterday():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2028, 1, 7)
+
+    # when
+    feedback = parse("1 year and 2 months after yesterday", today)
+
+    # then
+    assert feedback == target
+
+
+def test_years_and_months_after_yesterday_with_word_numbers():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2028, 1, 7)
+
+    # when
+    feedback = parse("one year and two months after yesterday", today)
+
+    # then
+    assert feedback == target
+
+
+def test_two_weeks_from_tomorrow():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 23)
+
+    # when
+    feedback = parse("two weeks from tomorrow", today)
+
+    # then
+    assert feedback == target
+
+
+def test_absolute_date_2025():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2025, 12, 1)
+
+    # when
+    feedback = parse("2025-12-01", today)
+
+    # then
+    assert feedback == target

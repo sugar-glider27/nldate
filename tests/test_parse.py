@@ -101,6 +101,54 @@ def test_in_one_week():
     assert feedback == target
 
 
+def test_in_3_months():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2027, 2, 8)
+
+    # when
+    feedback = parse("in 3 months", today)
+
+    # then
+    assert feedback == target
+
+
+def test_in_4_years():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2030, 11, 8)
+
+    # when
+    feedback = parse("in 4 years", today)
+
+    # then
+    assert feedback == target
+
+
+def test_in_one_month():
+    # given
+    today = date(2024, 1, 31)
+    target = date(2024, 2, 29)
+
+    # when
+    feedback = parse("in one month", today)
+
+    # then
+    assert feedback == target
+
+
+def test_in_one_year():
+    # given
+    today = date(2024, 2, 29)
+    target = date(2025, 2, 28)
+
+    # when
+    feedback = parse("in one year", today)
+
+    # then
+    assert feedback == target
+
+
 def test_three_days_ago():
     # given
     today = date(2026, 11, 8)

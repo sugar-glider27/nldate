@@ -469,6 +469,18 @@ def test_the_day_after_tomorrow():
     assert feedback == target
 
 
+def test_the_day_before_yesterday():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 6)
+
+    # when
+    feedback = parse("the day before yesterday", today)
+
+    # then
+    assert feedback == target
+
+
 def test_two_weeks_from_tomorrow():
     # given
     today = date(2026, 11, 8)

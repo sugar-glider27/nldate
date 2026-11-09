@@ -139,6 +139,8 @@ def _resolve_relative(text: str, ref: date) -> date | None:
         return ref - timedelta(days=1)
     if text == "day after tomorrow":
         return ref + timedelta(days=2)
+    if text == "day before yesterday":
+        return ref - timedelta(days=2)
     if text == "next week":
         return ref + timedelta(weeks=1)
     if text == "last week":

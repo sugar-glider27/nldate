@@ -421,6 +421,42 @@ def test_years_and_months_after_yesterday_with_word_numbers():
     assert feedback == target
 
 
+def test_two_years_comma_three_months_before_dec_1_2025():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2023, 9, 1)
+
+    # when
+    feedback = parse("2 years, 3 months before Dec. 1, 2025", today)
+
+    # then
+    assert feedback == target
+
+
+def test_two_years_and_three_months_before_dec_1_2025():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2023, 9, 1)
+
+    # when
+    feedback = parse("2 years and 3 months before Dec. 1, 2025", today)
+
+    # then
+    assert feedback == target
+
+
+def test_one_month_two_days_after_jan_31_2024():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2024, 3, 2)
+
+    # when
+    feedback = parse("1 month, 2 days after Jan. 31, 2024", today)
+
+    # then
+    assert feedback == target
+
+
 def test_two_weeks_from_tomorrow():
     # given
     today = date(2026, 11, 8)

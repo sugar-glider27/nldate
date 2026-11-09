@@ -12,8 +12,8 @@ _BEFORE_RE = re.compile(
 )
 _AFTER_RE = re.compile(r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+after\s+(.+)$")
 _FROM_RE = re.compile(r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+from\s+(.+)$")
-_YEARS_MONTHS_RE = re.compile(
-    r"^([a-z0-9]+)\s+years?\s+and\s+([a-z0-9]+)\s+months?\s+after\s+(.+)$"
+_COMPOUND_OFFSET_RE = re.compile(
+    r"^([a-z0-9]+)\s+(years?|months?|days?|weeks?)\s*(?:and|,)\s*([a-z0-9]+)\s+(years?|months?|days?|weeks?)\s+(before|after)\s+(.+)$"
 )
 _IN_OFFSET_RE = re.compile(r"^in\s+([a-z0-9]+)\s+(days?|weeks?|months?|years?)$")
 _DAYS_AGO_RE = re.compile(r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+ago$")
@@ -268,16 +268,38 @@ def _resolve_relative(text: str, ref: date) -> date | None:
             return _shift_months(anchor, count * 12)
         return anchor + timedelta(days=count)
 
-    years_months = _YEARS_MONTHS_RE.match(text)
-    if years_months is not None:
-        anchor = _resolve_relative(years_months.group(3), ref)
-        if anchor is None:
+    compound = _COMPOUND_OFFSET_RE.match(text)
+    if compound is not None:
+        first_count = _parse_count(compound.group(1))
+        second_count = _parse_count(compound.group(3))
+        unit1 = compound.group(2)
+        unit2 = compound.group(4)
+        direction = compound.group(5)
+        anchor = _resolve_relative(compound.group(6), ref)
+        if first_count is None or second_count is None or anchor is None:
             return None
-        years = _parse_count(years_months.group(1))
-        months = _parse_count(years_months.group(2))
-        if years is None or months is None:
-            return None
-        return _shift_months(anchor, years * 12 + months)
+        result = anchor
+        for count, unit in ((first_count, unit1), (second_count, unit2)):
+            if unit.startswith("week"):
+                delta = timedelta(weeks=count)
+                result = result - delta if direction == "before" else result + delta
+            elif unit.startswith("year"):
+                months = count * 12
+                result = _shift_months(
+                    result, -months if direction == "before" else months
+                )
+            elif unit.startswith("month"):
+                months = count
+                result = _shift_months(
+                    result, -months if direction == "before" else months
+                )
+            elif unit.startswith("day"):
+                result = (
+                    result - timedelta(days=count)
+                    if direction == "before"
+                    else result + timedelta(days=count)
+                )
+        return result
 
     return None
 

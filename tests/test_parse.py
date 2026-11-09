@@ -562,6 +562,30 @@ def test_now():
     assert feedback == target
 
 
+def test_three_days_from_now():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 11)
+
+    # when
+    feedback = parse("3 days from now", today)
+
+    # then
+    assert feedback == target
+
+
+def test_a_week_from_now():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 15)
+
+    # when
+    feedback = parse("a week from now", today)
+
+    # then
+    assert feedback == target
+
+
 def test_two_weeks_from_now():
     # given
     today = date(2026, 11, 8)
@@ -581,6 +605,42 @@ def test_one_week_from_now():
 
     # when
     feedback = parse("one week from now", today)
+
+    # then
+    assert feedback == target
+
+
+def test_a_year_from_now():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2027, 11, 8)
+
+    # when
+    feedback = parse("a year from now", today)
+
+    # then
+    assert feedback == target
+
+
+def test_a_year_from_now_from_leap_day():
+    # given
+    today = date(2024, 2, 29)
+    target = date(2025, 2, 28)
+
+    # when
+    feedback = parse("a year from now", today)
+
+    # then
+    assert feedback == target
+
+
+def test_three_months_from_now():
+    # given
+    today = date(2026, 1, 31)
+    target = date(2026, 4, 30)
+
+    # when
+    feedback = parse("three months from now", today)
 
     # then
     assert feedback == target

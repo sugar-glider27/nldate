@@ -6,7 +6,9 @@ _ABSOLUTE_FORMATS = ("%Y-%m-%d", "%Y/%m/%d")
 _NAMED_DATE_RE = re.compile(r"^([a-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s+(\d{4})$")
 _NEXT_WEEKDAY_RE = re.compile(r"^next\s+([a-z]+)$")
 _BEFORE_DAYS_RE = re.compile(r"^([a-z0-9]+)\s+days?\s+before\s+(.+)$")
-_WEEKS_FROM_RE = re.compile(r"^([a-z0-9]+)\s+(weeks?)\s+from\s+(.+)$")
+_WEEKS_FROM_RE = re.compile(
+    r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+from\s+(.+)$"
+)
 _YEARS_MONTHS_RE = re.compile(
     r"^([a-z0-9]+)\s+years?\s+and\s+([a-z0-9]+)\s+months?\s+after\s+(.+)$"
 )
@@ -173,7 +175,13 @@ def _resolve_relative(text: str, ref: date) -> date | None:
         anchor = _resolve_relative(weeks_from.group(3), ref)
         if anchor is None:
             return None
-        return anchor + timedelta(weeks=count)
+        if unit.startswith("week"):
+            return anchor + timedelta(weeks=count)
+        if unit.startswith("month"):
+            return _shift_months(anchor, count)
+        if unit.startswith("year"):
+            return _shift_months(anchor, count * 12)
+        return anchor + timedelta(days=count)
 
     years_months = _YEARS_MONTHS_RE.match(text)
     if years_months is not None:

@@ -92,6 +92,8 @@ def _resolve_relative(text: str, ref: date) -> date | None:
 
     if text == "today":
         return ref
+    if text == "now":
+        return ref
     if text == "tomorrow":
         return ref + timedelta(days=1)
     if text == "yesterday":

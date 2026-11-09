@@ -548,3 +548,39 @@ def test_a_month_ago():
 
     # then
     assert feedback == target
+
+
+def test_now():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 8)
+
+    # when
+    feedback = parse("now", today)
+
+    # then
+    assert feedback == target
+
+
+def test_two_weeks_from_now():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 22)
+
+    # when
+    feedback = parse("2 weeks from now", today)
+
+    # then
+    assert feedback == target
+
+
+def test_one_week_from_now():
+    # given
+    today = date(2026, 12, 28)
+    target = date(2027, 1, 4)
+
+    # when
+    feedback = parse("one week from now", today)
+
+    # then
+    assert feedback == target

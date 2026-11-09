@@ -598,6 +598,39 @@ def test_last_tuesday():
     assert feedback == target
 
 
+@pytest.mark.parametrize(
+    ("weekday", "last", "next"),
+    [
+        ("Monday", date(2026, 11, 2), date(2026, 11, 9)),
+        ("Tuesday", date(2026, 11, 3), date(2026, 11, 10)),
+        ("Wednesday", date(2026, 11, 4), date(2026, 11, 11)),
+        ("Thursday", date(2026, 11, 5), date(2026, 11, 12)),
+        ("Friday", date(2026, 11, 6), date(2026, 11, 13)),
+        ("Saturday", date(2026, 11, 7), date(2026, 11, 14)),
+        ("Sunday", date(2026, 11, 1), date(2026, 11, 15)),
+    ],
+)
+def test_last_and_next_weekday_from_sunday(weekday, last, next):
+    # given
+    today = date(2026, 11, 8)
+
+    # when / then
+    assert parse(f"last {weekday}", today) == last
+    assert parse(f"next {weekday}", today) == next
+
+
+def test_last_monday_from_2026_01_01():
+    # given
+    today = date(2026, 1, 1)
+    target = date(2025, 12, 29)
+
+    # when
+    feedback = parse("last Monday", today)
+
+    # then
+    assert feedback == target
+
+
 def test_two_weeks_after_iso_date():
     # given
     today = date(2026, 11, 8)

@@ -186,9 +186,9 @@ def _resolve_relative(text: str, ref: date) -> date | None:
 
     next_weekday = _NEXT_WEEKDAY_RE.match(text)
     if next_weekday is not None:
-        weekday = _WEEKDAYS.get(next_weekday.group(1)) or _WEEKDAY_ABBREVIATIONS.get(
-            next_weekday.group(1)
-        )
+        weekday = _WEEKDAYS.get(next_weekday.group(1))
+        if weekday is None:
+            weekday = _WEEKDAY_ABBREVIATIONS.get(next_weekday.group(1))
         if weekday is None:
             return None
         days_ahead = (weekday - ref.weekday()) % 7
@@ -198,9 +198,9 @@ def _resolve_relative(text: str, ref: date) -> date | None:
 
     last_weekday = _LAST_WEEKDAY_RE.match(text)
     if last_weekday is not None:
-        weekday = _WEEKDAYS.get(last_weekday.group(1)) or _WEEKDAY_ABBREVIATIONS.get(
-            last_weekday.group(1)
-        )
+        weekday = _WEEKDAYS.get(last_weekday.group(1))
+        if weekday is None:
+            weekday = _WEEKDAY_ABBREVIATIONS.get(last_weekday.group(1))
         if weekday is None:
             return None
         days_back = (ref.weekday() - weekday) % 7

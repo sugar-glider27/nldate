@@ -586,6 +586,18 @@ def test_a_week_from_now():
     assert feedback == target
 
 
+def test_last_tuesday():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 3)
+
+    # when
+    feedback = parse("last Tuesday", today)
+
+    # then
+    assert feedback == target
+
+
 def test_two_weeks_from_now():
     # given
     today = date(2026, 11, 8)
@@ -641,6 +653,42 @@ def test_three_months_from_now():
 
     # when
     feedback = parse("three months from now", today)
+
+    # then
+    assert feedback == target
+
+
+def test_last_friday():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 6)
+
+    # when
+    feedback = parse("last Friday", today)
+
+    # then
+    assert feedback == target
+
+
+def test_last_friday_when_today_is_friday():
+    # given
+    today = date(2026, 11, 6)
+    target = date(2026, 10, 30)
+
+    # when
+    feedback = parse("last Friday", today)
+
+    # then
+    assert feedback == target
+
+
+def test_last_thursday():
+    # given
+    today = date(2027, 1, 1)
+    target = date(2026, 12, 31)
+
+    # when
+    feedback = parse("last Thursday", today)
 
     # then
     assert feedback == target

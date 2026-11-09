@@ -5,6 +5,7 @@ from datetime import date, datetime, timedelta
 _ABSOLUTE_FORMATS = ("%Y-%m-%d", "%Y/%m/%d")
 _NAMED_DATE_RE = re.compile(r"^([a-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s+(\d{4})$")
 _NEXT_WEEKDAY_RE = re.compile(r"^next\s+([a-z]+)$")
+_LAST_WEEKDAY_RE = re.compile(r"^last\s+([a-z]+)$")
 _BEFORE_DAYS_RE = re.compile(r"^([a-z0-9]+)\s+days?\s+before\s+(.+)$")
 _WEEKS_FROM_RE = re.compile(
     r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+from\s+(.+)$"
@@ -154,6 +155,16 @@ def _resolve_relative(text: str, ref: date) -> date | None:
         if days_ahead == 0:
             days_ahead = 7
         return ref + timedelta(days=days_ahead)
+
+    last_weekday = _LAST_WEEKDAY_RE.match(text)
+    if last_weekday is not None:
+        weekday = _WEEKDAYS.get(last_weekday.group(1))
+        if weekday is None:
+            return None
+        days_back = (ref.weekday() - weekday) % 7
+        if days_back == 0:
+            days_back = 7
+        return ref - timedelta(days=days_back)
 
     before = _BEFORE_DAYS_RE.match(text)
     if before is not None:

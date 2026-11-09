@@ -598,6 +598,18 @@ def test_last_tuesday():
     assert feedback == target
 
 
+def test_two_weeks_after_iso_date():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2025, 12, 18)
+
+    # when
+    feedback = parse("2 weeks after 2025-12-04", today)
+
+    # then
+    assert feedback == target
+
+
 def test_two_weeks_from_now():
     # given
     today = date(2026, 11, 8)

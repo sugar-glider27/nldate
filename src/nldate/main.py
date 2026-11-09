@@ -2,14 +2,16 @@ import re
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 
-_ABSOLUTE_FORMATS = ("%Y-%m-%d", "%Y/%m/%d")
+_ABSOLUTE_FORMATS = ("%Y-%m-%d", "%Y/%m/%d", "%m/%d/%Y")
 _NAMED_DATE_RE = re.compile(r"^([a-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s+(\d{4})$")
+_NAMED_DAY_FIRST_RE = re.compile(r"^(\d{1,2})\s+([a-z]+)\.?\s+(\d{4})$")
 _NEXT_WEEKDAY_RE = re.compile(r"^next\s+([a-z]+)$")
 _LAST_WEEKDAY_RE = re.compile(r"^last\s+([a-z]+)$")
-_BEFORE_DAYS_RE = re.compile(r"^([a-z0-9]+)\s+days?\s+before\s+(.+)$")
-_WEEKS_FROM_RE = re.compile(
-    r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+from\s+(.+)$"
+_BEFORE_RE = re.compile(
+    r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+before\s+(.+)$"
 )
+_AFTER_RE = re.compile(r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+after\s+(.+)$")
+_FROM_RE = re.compile(r"^([a-z0-9]+)\s+(days?|weeks?|months?|years?)\s+from\s+(.+)$")
 _YEARS_MONTHS_RE = re.compile(
     r"^([a-z0-9]+)\s+years?\s+and\s+([a-z0-9]+)\s+months?\s+after\s+(.+)$"
 )
@@ -24,6 +26,15 @@ _WEEKDAYS = {
     "saturday": 5,
     "sunday": 6,
 }
+_WEEKDAY_ABBREVIATIONS = {
+    "mon": 0,
+    "tue": 1,
+    "wed": 2,
+    "thu": 3,
+    "fri": 4,
+    "sat": 5,
+    "sun": 6,
+}
 _NUMBERS = {
     "a": 1,
     "one": 1,
@@ -36,6 +47,23 @@ _NUMBERS = {
     "eight": 8,
     "nine": 9,
     "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
+    "twenty": 20,
+    "thirty": 30,
+    "forty": 40,
+    "fifty": 50,
+    "sixty": 60,
+    "seventy": 70,
+    "eighty": 80,
+    "ninety": 90,
 }
 _MONTH_NAMES = {
     "january": 1,
@@ -93,9 +121,16 @@ def _resolve_relative(text: str, ref: date) -> date | None:
             return None
         return date(int(named.group(3)), month, int(named.group(2)))
 
-    if text == "today":
-        return ref
-    if text == "now":
+    named_day_first = _NAMED_DAY_FIRST_RE.match(text)
+    if named_day_first is not None:
+        month = _MONTH_NAMES.get(named_day_first.group(2))
+        if month is None:
+            month = _MONTH_ABBREVIATIONS.get(named_day_first.group(2))
+        if month is None:
+            return None
+        return date(int(named_day_first.group(3)), month, int(named_day_first.group(1)))
+
+    if text == "today" or text == "now":
         return ref
     if text == "tomorrow":
         return ref + timedelta(days=1)
@@ -121,21 +156,24 @@ def _resolve_relative(text: str, ref: date) -> date | None:
         unit = in_offset.group(2)
         if token == "a" and unit[-1:] == "s":
             return None
+        result = ref
         if unit.startswith("week"):
-            return ref + timedelta(weeks=count)
-        if unit.startswith("month"):
-            return _shift_months(ref, count)
-        if unit.startswith("year"):
-            return _shift_months(ref, count * 12)
-        return ref + timedelta(days=count)
+            result = result + timedelta(weeks=count)
+        elif unit.startswith("month"):
+            result = _shift_months(result, count)
+        elif unit.startswith("year"):
+            result = _shift_months(result, count * 12)
+        else:
+            result = result + timedelta(days=count)
+        return result
 
-    days_ago = _DAYS_AGO_RE.match(text)
-    if days_ago is not None:
-        token = days_ago.group(1)
+    ago_match = _DAYS_AGO_RE.match(text)
+    if ago_match is not None:
+        token = ago_match.group(1)
         count = _parse_count(token)
         if count is None:
             return None
-        unit = days_ago.group(2)
+        unit = ago_match.group(2)
         if token == "a" and unit[-1:] == "s":
             return None
         if unit.startswith("week"):
@@ -148,7 +186,9 @@ def _resolve_relative(text: str, ref: date) -> date | None:
 
     next_weekday = _NEXT_WEEKDAY_RE.match(text)
     if next_weekday is not None:
-        weekday = _WEEKDAYS.get(next_weekday.group(1))
+        weekday = _WEEKDAYS.get(next_weekday.group(1)) or _WEEKDAY_ABBREVIATIONS.get(
+            next_weekday.group(1)
+        )
         if weekday is None:
             return None
         days_ahead = (weekday - ref.weekday()) % 7
@@ -158,7 +198,9 @@ def _resolve_relative(text: str, ref: date) -> date | None:
 
     last_weekday = _LAST_WEEKDAY_RE.match(text)
     if last_weekday is not None:
-        weekday = _WEEKDAYS.get(last_weekday.group(1))
+        weekday = _WEEKDAYS.get(last_weekday.group(1)) or _WEEKDAY_ABBREVIATIONS.get(
+            last_weekday.group(1)
+        )
         if weekday is None:
             return None
         days_back = (ref.weekday() - weekday) % 7
@@ -166,24 +208,56 @@ def _resolve_relative(text: str, ref: date) -> date | None:
             days_back = 7
         return ref - timedelta(days=days_back)
 
-    before = _BEFORE_DAYS_RE.match(text)
+    before = _BEFORE_RE.match(text)
     if before is not None:
-        count = _parse_count(before.group(1))
-        anchor = _resolve_relative(before.group(2), ref)
-        if count is None or anchor is None:
-            return None
-        return anchor - timedelta(days=count)
-
-    weeks_from = _WEEKS_FROM_RE.match(text)
-    if weeks_from is not None:
-        token = weeks_from.group(1)
+        token = before.group(1)
         count = _parse_count(token)
         if count is None:
             return None
-        unit = weeks_from.group(2)
+        unit = before.group(2)
         if token == "a" and unit[-1:] == "s":
             return None
-        anchor = _resolve_relative(weeks_from.group(3), ref)
+        anchor = _resolve_relative(before.group(3), ref)
+        if anchor is None:
+            return None
+        if unit.startswith("week"):
+            return anchor - timedelta(weeks=count)
+        if unit.startswith("month"):
+            return _shift_months(anchor, -count)
+        if unit.startswith("year"):
+            return _shift_months(anchor, -count * 12)
+        return anchor - timedelta(days=count)
+
+    after_match = _AFTER_RE.match(text)
+    if after_match is not None:
+        token = after_match.group(1)
+        count = _parse_count(token)
+        if count is None:
+            return None
+        unit = after_match.group(2)
+        if token == "a" and unit[-1:] == "s":
+            return None
+        anchor = _resolve_relative(after_match.group(3), ref)
+        if anchor is None:
+            return None
+        if unit.startswith("week"):
+            return anchor + timedelta(weeks=count)
+        if unit.startswith("month"):
+            return _shift_months(anchor, count)
+        if unit.startswith("year"):
+            return _shift_months(anchor, count * 12)
+        return anchor + timedelta(days=count)
+
+    from_match = _FROM_RE.match(text)
+    if from_match is not None:
+        token = from_match.group(1)
+        count = _parse_count(token)
+        if count is None:
+            return None
+        unit = from_match.group(2)
+        if token == "a" and unit[-1:] == "s":
+            return None
+        anchor = _resolve_relative(from_match.group(3), ref)
         if anchor is None:
             return None
         if unit.startswith("week"):
@@ -219,7 +293,13 @@ def _shift_months(d: date, months: int) -> date:
 def _parse_count(token: str) -> int | None:
     if token.isdigit():
         return int(token)
-    return _NUMBERS.get(token)
+    if token in _NUMBERS:
+        return _NUMBERS[token]
+    if "-" in token:
+        parts = token.split("-")
+        if len(parts) == 2 and parts[0] in _NUMBERS and parts[1] in _NUMBERS:
+            return _NUMBERS[parts[0]] + _NUMBERS[parts[1]]
+    return None
 
 
 def main() -> None:

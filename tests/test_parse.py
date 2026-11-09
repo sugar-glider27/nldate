@@ -503,3 +503,48 @@ def test_five_years_ago():
 
     # then
     assert feedback == target
+
+
+def test_a_week_ago():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 1)
+
+    # when
+    feedback = parse("a week ago", today)
+
+    # then
+    assert feedback == target
+
+
+def test_in_a_year():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2027, 11, 8)
+
+    # when
+    feedback = parse("in a year", today)
+
+    # then
+    assert feedback == target
+
+
+def test_a_weeks_ago_raises_value_error():
+    # given
+    today = date(2026, 11, 8)
+
+    # when / then
+    with pytest.raises(ValueError):
+        parse("a weeks ago", today)
+
+
+def test_a_month_ago():
+    # given
+    today = date(2024, 3, 31)
+    target = date(2024, 2, 29)
+
+    # when
+    feedback = parse("a month ago", today)
+
+    # then
+    assert feedback == target

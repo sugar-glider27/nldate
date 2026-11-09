@@ -6,7 +6,7 @@ _ABSOLUTE_FORMATS = ("%Y-%m-%d", "%Y/%m/%d")
 _NAMED_DATE_RE = re.compile(r"^([a-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s+(\d{4})$")
 _NEXT_WEEKDAY_RE = re.compile(r"^next\s+([a-z]+)$")
 _BEFORE_DAYS_RE = re.compile(r"^([a-z0-9]+)\s+days?\s+before\s+(.+)$")
-_WEEKS_FROM_RE = re.compile(r"^([a-z0-9]+)\s+weeks?\s+from\s+(.+)$")
+_WEEKS_FROM_RE = re.compile(r"^([a-z0-9]+)\s+(weeks?)\s+from\s+(.+)$")
 _YEARS_MONTHS_RE = re.compile(
     r"^([a-z0-9]+)\s+years?\s+and\s+([a-z0-9]+)\s+months?\s+after\s+(.+)$"
 )
@@ -22,6 +22,7 @@ _WEEKDAYS = {
     "sunday": 6,
 }
 _NUMBERS = {
+    "a": 1,
     "one": 1,
     "two": 2,
     "three": 3,
@@ -108,10 +109,13 @@ def _resolve_relative(text: str, ref: date) -> date | None:
 
     in_offset = _IN_OFFSET_RE.match(text)
     if in_offset is not None:
-        count = _parse_count(in_offset.group(1))
+        token = in_offset.group(1)
+        count = _parse_count(token)
         if count is None:
             return None
         unit = in_offset.group(2)
+        if token == "a" and unit[-1:] == "s":
+            return None
         if unit.startswith("week"):
             return ref + timedelta(weeks=count)
         if unit.startswith("month"):
@@ -122,10 +126,13 @@ def _resolve_relative(text: str, ref: date) -> date | None:
 
     days_ago = _DAYS_AGO_RE.match(text)
     if days_ago is not None:
-        count = _parse_count(days_ago.group(1))
+        token = days_ago.group(1)
+        count = _parse_count(token)
         if count is None:
             return None
         unit = days_ago.group(2)
+        if token == "a" and unit[-1:] == "s":
+            return None
         if unit.startswith("week"):
             return ref - timedelta(weeks=count)
         if unit.startswith("month"):
@@ -154,9 +161,15 @@ def _resolve_relative(text: str, ref: date) -> date | None:
 
     weeks_from = _WEEKS_FROM_RE.match(text)
     if weeks_from is not None:
-        count = _parse_count(weeks_from.group(1))
-        anchor = _resolve_relative(weeks_from.group(2), ref)
-        if count is None or anchor is None:
+        token = weeks_from.group(1)
+        count = _parse_count(token)
+        if count is None:
+            return None
+        unit = weeks_from.group(2)
+        if token == "a" and unit[-1:] == "s":
+            return None
+        anchor = _resolve_relative(weeks_from.group(3), ref)
+        if anchor is None:
             return None
         return anchor + timedelta(weeks=count)
 

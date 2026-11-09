@@ -457,6 +457,18 @@ def test_one_month_two_days_after_jan_31_2024():
     assert feedback == target
 
 
+def test_the_day_after_tomorrow():
+    # given
+    today = date(2026, 11, 8)
+    target = date(2026, 11, 10)
+
+    # when
+    feedback = parse("the day after tomorrow", today)
+
+    # then
+    assert feedback == target
+
+
 def test_two_weeks_from_tomorrow():
     # given
     today = date(2026, 11, 8)

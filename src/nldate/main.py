@@ -106,6 +106,7 @@ def parse(s: str, today: date | None = None) -> date:
 
 
 def _resolve_relative(text: str, ref: date) -> date | None:
+    text = re.sub(r"^the\s+", "", text)
     for fmt in _ABSOLUTE_FORMATS:
         try:
             return datetime.strptime(text, fmt).date()
